@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CODERX838 // KERNEL TTY</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #040507;
+      color: #38bdf8;
+      font-family: "Cascadia Code", "Fira Code", "Courier New", Consolas, monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow-x: hidden;
+    }
+
+    /* Hardware CRT Chassis */
+    .chassis {
+      background: #080b10;
+      border: 1px solid #172338;
+      border-radius: 4px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(56, 189, 248, 0.05);
+      max-width: 900px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* BIOS / Kernel Header */
+    .bios-header {
+      background: #0d131f;
+      border-bottom: 1px solid #172338;
+      padding: 8px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #64748b;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .telemetry-tag {
+      color: #38bdf8;
+      font-weight: 700;
+    }
+
+    /* CRT Terminal Screen */
+    .crt-screen {
+      padding: 24px 20px;
+      position: relative;
+      background: #05070b;
+    }
+
+    /* Subtle Scanlines */
+    .crt-screen::before {
+      content: " ";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
+      background-size: 100% 3px;
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    pre {
+      font-family: "Cascadia Code", "Fira Code", "Courier New", Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.35;
+      margin: 0;
+      white-space: pre;
+      text-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+    }
+
+    .t-cyan { color: #38bdf8; }
+    .t-green { color: #34d399; }
+    .t-purple { color: #c084fc; }
+    .t-amber { color: #fbbf24; }
+    .t-dim { color: #475569; }
+    .t-white { color: #f8fafc; font-weight: 700; }
+    .t-red { color: #f43f5e; }
+
+    /* Interactive ASCII Button */
+    .ascii-btn {
+      display: inline-block;
+      cursor: pointer;
+      margin-top: 14px;
+      user-select: none;
+      transition: transform 0.15s, color 0.15s;
+    }
+    .ascii-btn:hover {
+      transform: scale(1.02);
+      color: #f8fafc;
+      text-shadow: 0 0 16px rgba(56, 189, 248, 0.9);
+    }
+    .ascii-btn:active {
+      transform: scale(0.99);
+    }
+
+    #visualizer-matrix {
+      margin: 14px 0;
+      font-size: 13px;
+      letter-spacing: 2px;
+      min-height: 145px;
+      color: #38bdf8;
+    }
+
+    .cmd-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      background: #080c14;
+      border: 1px solid #172338;
+      padding: 6px 12px;
+      border-radius: 3px;
+    }
+    .cmd-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #f8fafc;
+      font-family: inherit;
+      font-size: 12px;
+      width: 100%;
+    }
+
+    .cursor {
+      animation: blink 0.9s step-end infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    a {
+      color: #38bdf8;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+      color: #f8fafc;
+    }
+  </style>
+</head>
+<body>
+
+<div class="chassis">
+  <!-- BIOS / Hardware Bar -->
+  <div class="bios-header">
+    <div>ARCH: x86_64 // DSP CORE // BUFFER: 1024 // 44.1kHz</div>
+    <div class="telemetry-tag" id="dsp-status">STATUS: STANDBY</div>
+  </div>
+
+  <div class="crt-screen">
+    <!-- VIEW 1: Standby Gateway with KNOW ABOUT ME -->
+    <div id="view-standby">
+      <pre class="t-cyan">
+╦╔═ ╔╗╔ ╔═╗ ╦ ╦   ╔═╗ ╔╗  ╔═╗ ╦ ╦ ╔╦╗   ╔╦╗ ╔═╗
+╠╩╗ ║║║ ║ ║ ║║║   ╠═╣ ╠╩╗ ║ ║ ║ ║  ║     ║║║ ╠═╣
+╩ ╩ ╝╚╝ ╚═╝ ╚╩╝   ╩ ╩ ╚═╝ ╚═╝ ╚═╝  ╩     ╩ ╩ ╩ ╩</pre>
+
+      <pre class="t-dim" style="margin-top:10px;">
+┌────────────────────────────────────────────────────────────────────────────┐
+│ [AUDIO MATRIX] : After the Rain.mp3 (4.6 MB) // 320kbps CBR Stereo        │
+│ [DSP SUBSYSTEM]: Discrete Fourier Transform &amp; Vertical Harmonic Raymarcher │
+│ [DIRECTIVE]    : Engage audio stream to decompress harmonic matrix.       │
+└────────────────────────────────────────────────────────────────────────────┘</pre>
+
+      <div class="ascii-btn t-green" id="btn-engage">
+<pre>
+╔════════════════════════════════════════════════════════════════════════════╗
+║  [▶] ENGAGE DSP CORE &amp; STREAM VERTICAL HARMONICS                          ║
+╚════════════════════════════════════════════════════════════════════════════╝</pre>
+      </div>
+
+      <pre class="t-dim" style="margin-top:12px;">HINT: Click the trigger block above or press [SPACE] to execute.</pre>
+    </div>
+
+    <!-- VIEW 2: Engaged Realtime DSP Matrix & Prodigy Bio -->
+    <div id="view-engaged" style="display:none;">
+      <pre class="t-dim">
+┌──[ DSP TELEMETRY ]─────────────────────────────────────────────────────────┐
+│ TRACK   : <span class="t-white">After the Rain.mp3</span>   │ TIME : <span id="dsp-time" class="t-amber">00:00 / 00:00</span>   │ FPS : <span class="t-green">60.0</span>   │
+│ PIPELINE: <span class="t-cyan">128-FFT BIN ENGINE</span>   │ MODE : <span class="t-purple">VERTICAL WAVE HARMONIC</span>       │ BASS: <span id="bass-bar" class="t-cyan">▇▇░░</span> │
+└────────────────────────────────────────────────────────────────────────────┘</pre>
+
+      <!-- Realtime Vertical Harmonic Moving Lines Matrix -->
+      <pre id="visualizer-matrix"></pre>
+
+      <pre class="t-dim">
+┌──[ SYSTEM MANIFEST // CODERX838 ]──────────────────────────────────────────┐
+│ <span class="t-white">&gt; ROLE</span>       : Full-Stack &amp; Mobile Developer                               │
+│ <span class="t-white">&gt; FOCUS</span>      : Modern Web Applications · Mobile Apps · Developer Tooling   │
+│ <span class="t-white">&gt; CORE STACK</span> : <span class="t-cyan">TypeScript</span> · <span class="t-green">Python</span> · <span class="t-amber">JavaScript</span> · <span class="t-white">HTML5 &amp; CSS3</span>             │
+│ <span class="t-white">&gt; CREATING</span>   : Building High-Performance Web &amp; Mobile Apps                 │
+│ <span class="t-white">&gt; OBJECTIVE</span>  : Write clean, reliable software. Keep it fast and minimal.   │
+└────────────────────────────────────────────────────────────────────────────┘</pre>
+
+      <!-- Control Bar -->
+      <div style="display:flex; gap:12px; margin-top:8px;">
+        <span class="ascii-btn t-amber" id="btn-pause">
+<pre>
+┌──────────────┐
+│ [⏸ HALT DSP] │
+└──────────────┘</pre>
+        </span>
+        <span class="ascii-btn t-cyan" id="btn-loop">
+<pre>
+┌───────────────┐
+│ [↺ REPLAY 0s] │
+└───────────────┘</pre>
+        </span>
+      </div>
+
+      <!-- Interactive Command Input -->
+      <div class="cmd-line">
+        <span class="t-green">coderx838@matrix:~$</span>
+        <input type="text" class="cmd-input" id="cli" placeholder="type 'help', 'stack', 'mobile', 'clear'..." autocomplete="off">
+        <span class="t-cyan cursor">█</span>
+      </div>
+
+      <!-- Real Terminal Output Log -->
+      <div id="cli-output" style="margin-top:10px; max-height:200px; overflow-y:auto;"></div>
+
+      <pre class="t-dim" style="margin-top:10px;">
+NET_ENDPOINTS: <a href="https://github.com/Coderx838" target="_blank">[1] github.com/Coderx838</a>  ·  <a href="https://twitter.com/coderx838" target="_blank">[2] twitter/coderx838</a>  ·  <a href="https://discord.gg/" target="_blank">[3] discord</a></pre>
+    </div>
+  </div>
+</div>
+
+<audio id="audio" src="After the Rain.mp3" preload="auto"></audio>
+
+<script>
+  const audio = document.getElementById('audio');
+  const viewStandby = document.getElementById('view-standby');
+  const viewEngaged = document.getElementById('view-engaged');
+  const btnEngage = document.getElementById('btn-engage');
+  const btnPause = document.getElementById('btn-pause');
+  const btnLoop = document.getElementById('btn-loop');
+  const matrix = document.getElementById('visualizer-matrix');
+  const dspStatus = document.getElementById('dsp-status');
+  const dspTime = document.getElementById('dsp-time');
+  const bassBar = document.getElementById('bass-bar');
+  const cli = document.getElementById('cli');
+
+  let audioCtx, analyser, dataArray;
+  let isEngaged = false;
+  let isPlaying = false;
+
+  // Prodigy Vertical Line Glyphs (from whisper thin to solid resonance)
+  const glyphs = ['·', '┊', '┆', '│', '╎', '┃', '║', '█'];
+  const COLS = 44;
+  const ROWS = 9;
+
+  function engageDSP() {
+    if (isEngaged) return;
+    isEngaged = true;
+
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const src = audioCtx.createMediaElementSource(audio);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      src.connect(analyser);
+      analyser.connect(audioCtx.destination);
+      dataArray = new Uint8Array(analyser.frequencyBinCount);
+    }
+
+    audio.play().then(() => {
+      isPlaying = true;
+      dspStatus.textContent = "STATUS: ACTIVE // 44.1kHz STEREO";
+      dspStatus.style.color = "#34d399";
+    }).catch(e => console.log('Audio init:', e));
+
+    viewStandby.style.display = 'none';
+    viewEngaged.style.display = 'block';
+    renderVerticalMatrix();
+    cli.focus();
+  }
+
+  btnEngage.addEventListener('click', engageDSP);
+
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && e.target !== cli) {
+      e.preventDefault();
+      if (!isEngaged) engageDSP();
+      else togglePlayback();
+    }
+  });
+
+  function togglePlayback() {
+    if (audio.paused) {
+      audio.play();
+      isPlaying = true;
+      btnPause.innerHTML = '<pre>┌──────────────┐\n│ [⏸ HALT DSP] │\n└──────────────┘</pre>';
+      dspStatus.textContent = "STATUS: ACTIVE // 44.1kHz STEREO";
+      dspStatus.style.color = "#34d399";
+    } else {
+      audio.pause();
+      isPlaying = false;
+      btnPause.innerHTML = '<pre>┌──────────────┐\n│ [▶ RESUME]   │\n└──────────────┘</pre>';
+      dspStatus.textContent = "STATUS: SUSPENDED";
+      dspStatus.style.color = "#fbbf24";
+    }
+  }
+
+  btnPause.addEventListener('click', togglePlayback);
+  btnLoop.addEventListener('click', () => {
+    audio.currentTime = 0;
+    audio.play();
+    isPlaying = true;
+    btnPause.innerHTML = '<pre>┌──────────────┐\n│ [⏸ HALT DSP] │\n└──────────────┘</pre>';
+  });
+
+  audio.addEventListener('timeupdate', () => {
+    const cur = formatTime(audio.currentTime);
+    const dur = formatTime(audio.duration || 0);
+    dspTime.textContent = `${cur} / ${dur}`;
+  });
+
+  function formatTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60).toString().padStart(2, '0');
+    return `${m}:${sec}`;
+  }
+
+  // Interactive CLI commands with real terminal output formatting
+  const cliOutput = document.getElementById('cli-output');
+  let cmdHistory = [];
+  let historyIdx = -1;
+
+  function printTerminal(cmd, responseHtml) {
+    const entry = document.createElement('div');
+    entry.style.marginBottom = '12px';
+    entry.innerHTML = `
+      <div style="font-size:12px; margin-bottom:4px;">
+        <span class="t-green">coderx838@matrix:~$</span> <span class="t-white">${escapeHtml(cmd)}</span>
+      </div>
+      <div style="font-size:12px; line-height:1.45;">${responseHtml}</div>
+    `;
+    cliOutput.appendChild(entry);
+    cliOutput.scrollTop = cliOutput.scrollHeight;
+  }
+
+  function escapeHtml(text) {
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  cli.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (cmdHistory.length > 0 && historyIdx < cmdHistory.length - 1) {
+        historyIdx++;
+        cli.value = cmdHistory[cmdHistory.length - 1 - historyIdx];
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIdx > 0) {
+        historyIdx--;
+        cli.value = cmdHistory[cmdHistory.length - 1 - historyIdx];
+      } else if (historyIdx === 0) {
+        historyIdx = -1;
+        cli.value = '';
+      }
+    } else if (e.key === 'Enter') {
+      const raw = cli.value.trim();
+      const val = raw.toLowerCase();
+      cli.value = '';
+      historyIdx = -1;
+      if (!val) return;
+      cmdHistory.push(raw);
+
+      let output = '';
+      if (val === 'help') {
+        output = `
+<pre class="t-dim">┌──[ COMMAND DIRECTORY ]────────────────────────────────────────────────────┐
+│ <span class="t-white">help</span>     - Display system commands reference manual                       │
+│ <span class="t-white">whoami</span>   - Print operator identity and core profile summary               │
+│ <span class="t-white">stack</span>    - Inspect active languages, runtimes &amp; frameworks                │
+│ <span class="t-white">mobile</span>   - Print cross-platform mobile application architecture           │
+│ <span class="t-white">projects</span> - List current active software &amp; mobile builds                  │
+│ <span class="t-white">dsp</span>      - Print live audio pipeline telemetry &amp; buffer metrics           │
+│ <span class="t-white">pause</span>    - Halt / resume DSP audio playback (or hit [SPACE])             │
+│ <span class="t-white">clear</span>    - Flush terminal output buffer                                   │
+└───────────────────────────────────────────────────────────────────────────┘</pre>`;
+      } else if (val === 'whoami') {
+        output = `<pre class="t-cyan">&gt; OPERATOR: <span class="t-white">Coderx838</span> // Full-Stack &amp; Mobile Developer\n&gt; STATUS  : Actively building clean web systems and mobile apps.</pre>`;
+      } else if (val === 'stack') {
+        output = `<pre class="t-dim">┌──[ CORE TECHNOLOGY STACK ]────────────────────────────────────────────────┐
+│ <span class="t-cyan">LANGUAGES</span> : TypeScript · Python · JavaScript · HTML5 &amp; CSS3                 │
+│ <span class="t-purple">MOBILE</span>    : Cross-Platform Mobile Applications (iOS / Android)              │
+│ <span class="t-green">SYSTEMS</span>   : Linux CLI · Node.js runtime · Git VCS · Clean APIs              │
+└───────────────────────────────────────────────────────────────────────────┘</pre>`;
+      } else if (val === 'mobile') {
+        output = `<pre class="t-green">&gt; MOBILE DEVELOPMENT:
+  Crafting fast, intuitive, and responsive cross-platform mobile applications
+  focusing on seamless UI, minimal overhead, and native performance.</pre>`;
+      } else if (val === 'projects') {
+        output = `<pre class="t-amber">&gt; ACTIVE WORK:
+  [01] Mobile Applications (High-performance cross-platform apps)
+  [02] Web Systems (Full-stack clean architectures &amp; APIs)
+  [03] Developer Tools (CLI utilities &amp; workflow automation)</pre>`;
+      } else if (val === 'dsp') {
+        output = `<pre class="t-dim">┌──[ DSP TELEMETRY ]────────────────────────────────────────────────────────┐
+│ STREAM  : After the Rain.mp3 (Stereo CBR 320kbps)                         │
+│ ENGINE  : Web Audio API // 256-FFT Realtime Analyzer                      │
+│ BUFFER  : 1024 frames // Latency: 5.8ms // Sample Rate: 44100 Hz          │
+│ FPS     : 60.0 FPS Harmonic Raymarcher                                    │
+└───────────────────────────────────────────────────────────────────────────┘</pre>`;
+      } else if (val === 'pause' || val === 'play') {
+        togglePlayback();
+        output = `<pre class="t-cyan">&gt; DSP state toggled: <span class="t-white">${audio.paused ? 'PAUSED' : 'STREAMING'}</span></pre>`;
+      } else if (val === 'clear') {
+        cliOutput.innerHTML = '';
+        return;
+      } else {
+        output = `<pre class="t-red">bash: command not found: ${escapeHtml(raw)}. Type '<span class="t-white">help</span>' for available commands.</pre>`;
+      }
+
+      printTerminal(raw, output);
+    }
+  });
+
+  // Pure Vertical Harmonic Wave Engine
+  let tick = 0;
+  function renderVerticalMatrix() {
+    tick += 0.12;
+
+    let bins = [];
+    let bassEnergy = 0;
+
+    if (analyser && isPlaying) {
+      analyser.getByteFrequencyData(dataArray);
+      // Sample low frequencies for bass bar
+      let bSum = 0;
+      for (let i = 0; i < 8; i++) bSum += dataArray[i];
+      bassEnergy = bSum / 8 / 255;
+
+      // Sample 44 frequency columns across FFT spectrum
+      for (let c = 0; c < COLS; c++) {
+        const binIdx = Math.floor((c / COLS) * 50);
+        bins.push(dataArray[binIdx] / 255);
+      }
+    } else {
+      // Dynamic ambient harmonic algorithm
+      for (let c = 0; c < COLS; c++) {
+        bins.push(0.3 + 0.3 * Math.sin(tick * 0.7 + c * 0.22) * Math.cos(tick * 0.4 - c * 0.15));
+      }
+      bassEnergy = 0.4;
+    }
+
+    // Update bass meter
+    const bBlocks = Math.floor(bassEnergy * 8);
+    bassBar.textContent = '█'.repeat(bBlocks) + '░'.repeat(Math.max(0, 8 - bBlocks));
+
+    // Construct 2D grid of purely vertical characters
+    let screen = [];
+    for (let r = 0; r < ROWS; r++) {
+      let row = '';
+      const distFromBottom = (ROWS - 1) - r;
+
+      for (let c = 0; c < COLS; c++) {
+        const energy = bins[c] || 0.2;
+        // Harmonic interfering heights
+        const harmonic = Math.sin(tick + c * 0.35) * 1.8 + Math.cos(tick * 0.5 - c * 0.2) * 1.2;
+        const targetHeight = Math.floor(energy * ROWS * 1.2 + harmonic);
+
+        if (distFromBottom <= targetHeight) {
+          // Select vertical line glyph based on intensity
+          const gIdx = Math.min(glyphs.length - 1, Math.floor(energy * (glyphs.length - 1)));
+          row += glyphs[gIdx] + ' ';
+        } else if (distFromBottom <= targetHeight + 1.2) {
+          row += '· ';
+        } else {
+          row += '  ';
+        }
+      }
+      screen.push(row);
+    }
+
+    matrix.textContent = screen.join('\n');
+    requestAnimationFrame(renderVerticalMatrix);
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+# Local preview & testing files
+preview.html
+*.tmp
+*.log
+
+# Screenshots and raw input media
+Screenshot*
+ChatGPT Image*
+
+# System
+.DS_Store
+Thumbs.db
