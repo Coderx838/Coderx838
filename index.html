@@ -233,13 +233,17 @@
       <!-- Real Terminal Output Log -->
       <div id="cli-output" style="margin-top:10px; max-height:200px; overflow-y:auto;"></div>
 
+      <!-- Native Master Audio Output -->
+      <div style="margin-top:12px; background:#080c14; border:1px solid #172338; padding:8px 12px; border-radius:4px;">
+        <div style="font-size:11px; color:#64748b; margin-bottom:6px; letter-spacing:1px;">HARDWARE AUDIO CONTROLLER:</div>
+        <audio id="audio" src="After the Rain.mp3" controls preload="auto" style="width:100%; height:32px; filter:invert(88%) hue-rotate(180deg);"></audio>
+      </div>
+
       <pre class="t-dim" style="margin-top:10px;">
 NET_ENDPOINTS: <a href="https://github.com/Coderx838" target="_blank">[1] github.com/Coderx838</a>  ·  <a href="https://twitter.com/coderx838" target="_blank">[2] twitter/coderx838</a>  ·  <a href="https://discord.gg/" target="_blank">[3] discord</a></pre>
     </div>
   </div>
 </div>
-
-<audio id="audio" src="After the Rain.mp3" preload="auto"></audio>
 
 <script>
   const audio = document.getElementById('audio');
@@ -267,21 +271,46 @@ NET_ENDPOINTS: <a href="https://github.com/Coderx838" target="_blank">[1] github
     if (isEngaged) return;
     isEngaged = true;
 
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const src = audioCtx.createMediaElementSource(audio);
-      analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 256;
-      src.connect(analyser);
-      analyser.connect(audioCtx.destination);
-      dataArray = new Uint8Array(analyser.frequencyBinCount);
+    // Ensure master volume is at 100%
+    audio.volume = 1.0;
+    audio.muted = false;
+
+    // Prevent Chromium file:// CORS silencing
+    const isLocalFile = window.location.protocol === 'file:';
+
+    if (!isLocalFile && !audioCtx) {
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const src = audioCtx.createMediaElementSource(audio);
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        src.connect(analyser);
+        src.connect(audioCtx.destination);
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+      } catch (err) {
+        console.warn("WebAudio graph fallback:", err);
+      }
+    } else if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
     }
 
-    audio.play().then(() => {
-      isPlaying = true;
-      dspStatus.textContent = "STATUS: ACTIVE // 44.1kHz STEREO";
-      dspStatus.style.color = "#34d399";
-    }).catch(e => console.log('Audio init:', e));
+    // Direct audio play with promise error handling
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        isPlaying = true;
+        dspStatus.textContent = "STATUS: ACTIVE // 44.1kHz STEREO";
+        dspStatus.style.color = "#34d399";
+      }).catch(e => {
+        console.warn('Audio play prevented:', e);
+        // Retry on next user interaction
+        dspStatus.textContent = "STATUS: CLICK AGAIN TO UNMUTE";
+        dspStatus.style.color = "#fbbf24";
+      });
+    }
 
     viewStandby.style.display = 'none';
     viewEngaged.style.display = 'block';
@@ -301,6 +330,9 @@ NET_ENDPOINTS: <a href="https://github.com/Coderx838" target="_blank">[1] github
 
   function togglePlayback() {
     if (audio.paused) {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
       audio.play();
       isPlaying = true;
       btnPause.innerHTML = '<pre>┌──────────────┐\n│ [⏸ HALT DSP] │\n└──────────────┘</pre>';
@@ -452,6 +484,14 @@ NET_ENDPOINTS: <a href="https://github.com/Coderx838" target="_blank">[1] github
         const binIdx = Math.floor((c / COLS) * 50);
         bins.push(dataArray[binIdx] / 255);
       }
+    } else if (isPlaying) {
+      // Harmonic audio-time sync when on local file:// origin
+      const curT = audio.currentTime || tick;
+      for (let c = 0; c < COLS; c++) {
+        const v = 0.35 + 0.3 * Math.sin(curT * 4 + c * 0.25) * Math.cos(curT * 2 - c * 0.18);
+        bins.push(Math.max(0.1, Math.min(0.95, v)));
+      }
+      bassEnergy = 0.4 + 0.35 * Math.abs(Math.sin(curT * 3));
     } else {
       // Dynamic ambient harmonic algorithm
       for (let c = 0; c < COLS; c++) {
