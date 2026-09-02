@@ -1,4 +1,4 @@
-<div align="center">
+<div>
 
 
 
@@ -10,8 +10,5 @@
   </a>
 </h3>
 
-<p align="center">
-
-</p>
 
 </div>
