@@ -6,6 +6,9 @@ preview.html
 # Screenshots and raw input media
 Screenshot*
 ChatGPT Image*
+*.png
+*.jpg
+*.jpeg
 
 # System
 .DS_Store
