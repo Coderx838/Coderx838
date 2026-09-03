@@ -201,10 +201,11 @@
       <pre class="t-dim">
 ┌──[ SYSTEM MANIFEST // CODERX838 ]──────────────────────────────────────────┐
 │ <span class="t-white">&gt; ROLE</span>       : Full-Stack &amp; Mobile Developer                               │
-│ <span class="t-white">&gt; FOCUS</span>      : Modern Web Applications · Mobile Apps · Developer Tooling   │
+│ <span class="t-white">&gt; FRONTEND</span>   : <span class="t-cyan">React</span> · <span class="t-purple">Vite</span> · <span class="t-cyan">Tailwind CSS</span> · Modern Web Architectures      │
 │ <span class="t-white">&gt; CORE STACK</span> : <span class="t-cyan">TypeScript</span> · <span class="t-green">Python</span> · <span class="t-amber">JavaScript</span> · <span class="t-white">HTML5 &amp; CSS3</span>             │
-│ <span class="t-white">&gt; CREATING</span>   : Building High-Performance Web &amp; Mobile Apps                 │
-│ <span class="t-white">&gt; OBJECTIVE</span>  : Write clean, reliable software. Keep it fast and minimal.   │
+│ <span class="t-white">&gt; MOBILE</span>     : Cross-Platform Mobile Applications (iOS / Android)          │
+│ <span class="t-white">&gt; CREATING</span>   : High-Performance Web Applications &amp; Mobile Ecosystems       │
+│ <span class="t-white">&gt; OBJECTIVE</span>  : Build clean, fast, resilient software. Zero bloat.          │
 └────────────────────────────────────────────────────────────────────────────┘</pre>
 
       <!-- Control Bar -->
@@ -226,7 +227,7 @@
       <!-- Interactive Command Input -->
       <div class="cmd-line">
         <span class="t-green">coderx838@matrix:~$</span>
-        <input type="text" class="cmd-input" id="cli" placeholder="type 'help', 'stack', 'mobile', 'clear'..." autocomplete="off">
+        <input type="text" class="cmd-input" id="cli" placeholder="type 'help', 'stack', 'projects', 'clear'..." autocomplete="off">
         <span class="t-cyan cursor">█</span>
       </div>
 
@@ -420,29 +421,25 @@ NET_ENDPOINTS: <a href="https://github.com/Coderx838" target="_blank">[1] github
 │ <span class="t-white">help</span>     - Display system commands reference manual                       │
 │ <span class="t-white">whoami</span>   - Print operator identity and core profile summary               │
 │ <span class="t-white">stack</span>    - Inspect active languages, runtimes &amp; frameworks                │
-│ <span class="t-white">mobile</span>   - Print cross-platform mobile application architecture           │
 │ <span class="t-white">projects</span> - List current active software &amp; mobile builds                  │
 │ <span class="t-white">dsp</span>      - Print live audio pipeline telemetry &amp; buffer metrics           │
 │ <span class="t-white">pause</span>    - Halt / resume DSP audio playback (or hit [SPACE])             │
 │ <span class="t-white">clear</span>    - Flush terminal output buffer                                   │
 └───────────────────────────────────────────────────────────────────────────┘</pre>`;
       } else if (val === 'whoami') {
-        output = `<pre class="t-cyan">&gt; OPERATOR: <span class="t-white">Coderx838</span> // Full-Stack &amp; Mobile Developer\n&gt; STATUS  : Actively building clean web systems and mobile apps.</pre>`;
+        output = `<pre class="t-cyan">&gt; OPERATOR: <span class="t-white">Coderx838</span> // Full-Stack &amp; Mobile Developer\n&gt; STACK   : React · Vite · Tailwind CSS · TypeScript · Python · Mobile\n&gt; STATUS  : Actively engineering clean web platforms and mobile applications.</pre>`;
       } else if (val === 'stack') {
-        output = `<pre class="t-dim">┌──[ CORE TECHNOLOGY STACK ]────────────────────────────────────────────────┐
-│ <span class="t-cyan">LANGUAGES</span> : TypeScript · Python · JavaScript · HTML5 &amp; CSS3                 │
-│ <span class="t-purple">MOBILE</span>    : Cross-Platform Mobile Applications (iOS / Android)              │
-│ <span class="t-green">SYSTEMS</span>   : Linux CLI · Node.js runtime · Git VCS · Clean APIs              │
-└───────────────────────────────────────────────────────────────────────────┘</pre>`;
-      } else if (val === 'mobile') {
-        output = `<pre class="t-green">&gt; MOBILE DEVELOPMENT:
-  Crafting fast, intuitive, and responsive cross-platform mobile applications
-  focusing on seamless UI, minimal overhead, and native performance.</pre>`;
+        output = `<pre class="t-dim">┌──[ CORE TECHNOLOGY STACK ]─────────────────────────────────────────────────┐
+│ <span class="t-cyan">FRONTEND</span>  : React · Vite · Tailwind CSS (Modern Fast Architecture)         │
+│ <span class="t-white">LANGUAGES</span> : TypeScript · Python · JavaScript · HTML5 &amp; CSS3                │
+│ <span class="t-purple">MOBILE</span>    : Cross-Platform Mobile Applications (iOS / Android)             │
+│ <span class="t-green">SYSTEMS</span>   : Linux CLI · Node.js runtime · Git VCS · Clean APIs             │
+└────────────────────────────────────────────────────────────────────────────┘</pre>`;
       } else if (val === 'projects') {
         output = `<pre class="t-amber">&gt; ACTIVE WORK:
-  [01] Mobile Applications (High-performance cross-platform apps)
-  [02] Web Systems (Full-stack clean architectures &amp; APIs)
-  [03] Developer Tools (CLI utilities &amp; workflow automation)</pre>`;
+  [01] React + Vite + Tailwind Web Platforms (Ultra-fast SPA &amp; dashboard systems)
+  [02] Mobile Applications (High-performance cross-platform apps for iOS &amp; Android)
+  [03] Developer Tools &amp; Automation Engines (Python &amp; TypeScript CLI utilities)</pre>`;
       } else if (val === 'dsp') {
         output = `<pre class="t-dim">┌──[ DSP TELEMETRY ]────────────────────────────────────────────────────────┐
 │ STREAM  : After the Rain.mp3 (Stereo CBR 320kbps)                         │
