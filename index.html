@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CODERX838 // KERNEL TTY</title>
+  <title>Coderx838</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -150,7 +150,7 @@
 <div class="chassis">
   <!-- BIOS / Hardware Bar -->
   <div class="bios-header">
-    <div>ARCH: x86_64 // DSP CORE // BUFFER: 1024 // 44.1kHz</div>
+    <div>CODERX838 // FULL-STACK &amp; MOBILE DEVELOPER // TERMINAL</div>
     <div class="telemetry-tag" id="dsp-status">STATUS: STANDBY</div>
   </div>
 
@@ -171,28 +171,30 @@
 /_/  |_/_____/\____/\____/ /_/    /_/  /_/_____/   </pre>
 
       <pre class="t-dim" style="margin-top:10px;">
-┌────────────────────────────────────────────────────────────────────────────┐
-│ [AUDIO MATRIX] : After the Rain.mp3 (4.6 MB) // 320kbps CBR Stereo        │
-│ [DSP SUBSYSTEM]: Discrete Fourier Transform &amp; Vertical Harmonic Raymarcher │
-│ [DIRECTIVE]    : Engage audio stream to decompress harmonic matrix.       │
+┌──[ ABOUT THIS SPACE ]──────────────────────────────────────────────────────┐
+│ <span class="t-white">&gt; OPERATOR</span>  : Coderx838 — Full-Stack &amp; Mobile Developer                    │
+│ <span class="t-white">&gt; OVERVIEW</span>  : Interactive terminal portfolio showcasing web systems,       │
+│               cross-platform mobile apps, and technical background.        │
+│ <span class="t-white">&gt; SOUNDTRACK</span>: "After the Rain" (plays live with ASCII audio visualizer)    │
+│ <span class="t-white">&gt; ACTION</span>    : Click below to start the audio and launch the full terminal. │
 └────────────────────────────────────────────────────────────────────────────┘</pre>
 
       <div class="ascii-btn t-green" id="btn-engage">
 <pre>
 ╔════════════════════════════════════════════════════════════════════════════╗
-║  [▶] ENGAGE DSP CORE &amp; STREAM VERTICAL HARMONICS                          ║
+║  [▶] START AUDIO &amp; LAUNCH INTERACTIVE TERMINAL                             ║
 ╚════════════════════════════════════════════════════════════════════════════╝</pre>
       </div>
 
-      <pre class="t-dim" style="margin-top:12px;">HINT: Click the trigger block above or press [SPACE] to execute.</pre>
+      <pre class="t-dim" style="margin-top:12px;">TIP: Click the button above or press [SPACE] to start music and open the terminal.</pre>
     </div>
 
     <!-- VIEW 2: Engaged Realtime DSP Matrix & Prodigy Bio -->
     <div id="view-engaged" style="display:none;">
       <pre class="t-dim">
-┌──[ DSP TELEMETRY ]─────────────────────────────────────────────────────────┐
-│ TRACK   : <span class="t-white">After the Rain.mp3</span>   │ TIME : <span id="dsp-time" class="t-amber">00:00 / 00:00</span>   │ FPS : <span class="t-green">60.0</span>   │
-│ PIPELINE: <span class="t-cyan">128-FFT BIN ENGINE</span>   │ MODE : <span class="t-purple">VERTICAL WAVE HARMONIC</span>       │ BASS: <span id="bass-bar" class="t-cyan">▇▇░░</span> │
+┌──[ NOW PLAYING &amp; TELEMETRY ]───────────────────────────────────────────────┐
+│ TRACK   : <span class="t-white">After the Rain.mp3</span>             TIME   : <span id="dsp-time" class="t-amber">00:00 / 00:00</span>            │
+│ AUDIO   : <span class="t-cyan">44.1kHz Stereo (Live FFT)</span>      BEAT   : <span id="bass-bar" class="t-cyan">[||||....]</span>               │
 └────────────────────────────────────────────────────────────────────────────┘</pre>
 
       <!-- Realtime Vertical Harmonic Moving Lines Matrix -->
@@ -213,7 +215,7 @@
         <span class="ascii-btn t-amber" id="btn-pause">
 <pre>
 ┌──────────────┐
-│ [⏸ HALT DSP] │
+│ [⏸ PAUSE]    │
 └──────────────┘</pre>
         </span>
         <span class="ascii-btn t-cyan" id="btn-loop">
@@ -236,7 +238,7 @@
 
       <!-- Native Master Audio Output -->
       <div style="margin-top:12px; background:#080c14; border:1px solid #172338; padding:8px 12px; border-radius:4px;">
-        <div style="font-size:11px; color:#64748b; margin-bottom:6px; letter-spacing:1px;">HARDWARE AUDIO CONTROLLER:</div>
+        <div style="font-size:11px; color:#64748b; margin-bottom:6px; letter-spacing:1px;">AUDIO CONTROLS &amp; SCRUBBER:</div>
         <audio id="audio" src="After the Rain.mp3" controls preload="auto" style="width:100%; height:32px; filter:invert(88%) hue-rotate(180deg);"></audio>
       </div>
 
@@ -303,7 +305,7 @@ NET_ENDPOINTS: <a href="https://github.com/Coderx838" target="_blank">[1] github
     if (playPromise !== undefined) {
       playPromise.then(() => {
         isPlaying = true;
-        dspStatus.textContent = "STATUS: ACTIVE // 44.1kHz STEREO";
+        dspStatus.textContent = "STATUS: PLAYING // 'AFTER THE RAIN'";
         dspStatus.style.color = "#34d399";
       }).catch(e => {
         console.warn('Audio play prevented:', e);
@@ -336,14 +338,14 @@ NET_ENDPOINTS: <a href="https://github.com/Coderx838" target="_blank">[1] github
       }
       audio.play();
       isPlaying = true;
-      btnPause.innerHTML = '<pre>┌──────────────┐\n│ [⏸ HALT DSP] │\n└──────────────┘</pre>';
-      dspStatus.textContent = "STATUS: ACTIVE // 44.1kHz STEREO";
+      btnPause.innerHTML = '<pre>┌──────────────┐\n│ [⏸ PAUSE]    │\n└──────────────┘</pre>';
+      dspStatus.textContent = "STATUS: PLAYING // 'AFTER THE RAIN'";
       dspStatus.style.color = "#34d399";
     } else {
       audio.pause();
       isPlaying = false;
       btnPause.innerHTML = '<pre>┌──────────────┐\n│ [▶ RESUME]   │\n└──────────────┘</pre>';
-      dspStatus.textContent = "STATUS: SUSPENDED";
+      dspStatus.textContent = "STATUS: PAUSED";
       dspStatus.style.color = "#fbbf24";
     }
   }
@@ -353,7 +355,7 @@ NET_ENDPOINTS: <a href="https://github.com/Coderx838" target="_blank">[1] github
     audio.currentTime = 0;
     audio.play();
     isPlaying = true;
-    btnPause.innerHTML = '<pre>┌──────────────┐\n│ [⏸ HALT DSP] │\n└──────────────┘</pre>';
+    btnPause.innerHTML = '<pre>┌──────────────┐\n│ [⏸ PAUSE]    │\n└──────────────┘</pre>';
   });
 
   audio.addEventListener('timeupdate', () => {
@@ -363,7 +365,7 @@ NET_ENDPOINTS: <a href="https://github.com/Coderx838" target="_blank">[1] github
   });
 
   function formatTime(s) {
-    const m = Math.floor(s / 60);
+    const m = Math.floor(s / 60).toString().padStart(2, '0');
     const sec = Math.floor(s % 60).toString().padStart(2, '0');
     return `${m}:${sec}`;
   }
@@ -497,9 +499,9 @@ NET_ENDPOINTS: <a href="https://github.com/Coderx838" target="_blank">[1] github
       bassEnergy = 0.4;
     }
 
-    // Update bass meter
+    // Update bass meter (fixed-width single-cell ASCII)
     const bBlocks = Math.floor(bassEnergy * 8);
-    bassBar.textContent = '█'.repeat(bBlocks) + '░'.repeat(Math.max(0, 8 - bBlocks));
+    bassBar.textContent = '[' + '|'.repeat(bBlocks) + '.'.repeat(Math.max(0, 8 - bBlocks)) + ']';
 
     // Construct 2D grid of purely vertical characters
     let screen = [];
